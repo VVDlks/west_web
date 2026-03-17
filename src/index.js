@@ -2,6 +2,7 @@ import Card from './Card.js';
 import Game from './Game.js';
 import TaskQueue from './TaskQueue.js';
 import SpeedRate from './SpeedRate.js';
+import card from "./Card.js";
 
 // Отвечает является ли карта уткой.
 function isDuck(card) {
@@ -75,18 +76,14 @@ class Duck extends Creature {
     constructor(name = 'Мирная утка', power = 2) {
         super(name, power);
     }
-
-    quacks() {
-        console.log('quack');
-    }
-
-    swims() {
-        console.log('float: both;');
-    }
+    quacks() { console.log('quack') };
+    swims() { console.log('float: both;') };
 }
 
+
+
 // Основа для собаки.
-class Dog extends Creature {
+class Dog extends Creature{
     constructor(name = 'Бандит', power = 3) {
         super(name, power);
     }
@@ -94,17 +91,17 @@ class Dog extends Creature {
 
 // Колода Шерифа, нижнего игрока.
 const seriffStartDeck = [
-    new Gatling(), // Гатлинг на позиции 0
-    new Dog('Бандит', 3),
+    new Duck(),
+    new Duck(),
+    new Duck(),
+    new Gatling(),
+];
+const banditStartDeck = [
+    new Trasher(),
+    new Dog(),
+    new Dog(),
 ];
 
-// Колода Бандита, верхнего игрока.
-const banditStartDeck = [
-    new Dog('Бандит', 3),
-    new Dog('Бандит', 3),
-    new Dog('Бандит', 3),
-    new Dog('Пес-бандит', 3),
-];
 
 // Создание игры.
 const game = new Game(seriffStartDeck, banditStartDeck);
