@@ -45,14 +45,17 @@ class Gatling extends Creature {
         super(name, power);
     }
 
+    quacks() { console.log('quack') };
+    swims() { console.log('float: both;') };
+
     attack(gameContext, continuation) {
         const taskQueue = new TaskQueue();
         const {currentPlayer, oppositePlayer, updateView} = gameContext;
 
         taskQueue.push(onDone => this.view.showAttack(onDone));
 
-        for (let i = 0; i < oppositePlayer.table.length; i++) {
-            const card = oppositePlayer.table[i];
+        for (let i = 0; i < gameContext.oppositePlayer.table.length; i++) {
+            const card = gameContext.oppositePlayer.table[i];
             if (card) {
                 const cardContext = {
                     currentPlayer,
@@ -80,12 +83,24 @@ class Duck extends Creature {
     swims() { console.log('float: both;') };
 }
 
-
-
 // Основа для собаки.
 class Dog extends Creature{
     constructor(name = 'Бандит', power = 3) {
         super(name, power);
+    }
+}
+
+class Trasher extends Dog {
+    constructor(name = 'Бандит', power = 5) {
+        super(name, power);
+    }
+    modifyTakenDamage(value, fromCard, gameContext, continuation){
+        this.view.signalAbility(() => {continuation(value - 1);})
+    }
+
+    getDescriptions (){
+        const description = super.getDescriptions();
+        return [...description, 'Громила: -1 урон'];
     }
 }
 
