@@ -28,12 +28,13 @@ function getCreatureDescription(card) {
     return 'Существо';
 }
 
-class Creature extends Card {
+
+class Creature extends Card{
     constructor(name, maxPower) {
         super(name, maxPower);
     }
 
-    getDescriptions() {
+    getDescriptions (){
         const creatureDescription = getCreatureDescription(this);
         const description = super.getDescriptions();
         return [creatureDescription, ...description];
@@ -75,7 +76,7 @@ class Gatling extends Creature {
 }
 
 // Основа для утки.
-class Duck extends Creature {
+class Duck extends Creature{
     constructor(name = 'Мирная утка', power = 2) {
         super(name, power);
     }
@@ -83,11 +84,64 @@ class Duck extends Creature {
     swims() { console.log('float: both;') };
 }
 
+
+
 // Основа для собаки.
 class Dog extends Creature{
     constructor(name = 'Бандит', power = 3) {
         super(name, power);
     }
+}
+
+class Lad extends Dog{
+    constructor(name = 'Браток', power = 2) {
+        super(name, power);
+    }
+    static getInGameCount() {
+        return this.inGameCount || 0;
+    }
+    static setInGameCount(value) {
+        this.inGameCount = value;
+    }
+
+    doAfterComingIntoPlay(gameContext, continuation) {
+        const {currentPlayer, oppositePlayer, position, updateView} = gameContext;
+        Lad.setInGameCount(Lad.getInGameCount() + 1);
+        continuation();
+    }
+
+    doBeforeRemoving(continuation) {
+        Lad.setInGameCount(Lad.getInGameCount() - 1);
+        continuation();
+    };
+
+    static getBonus() {
+        const currentBratkov = this.getInGameCount();
+            return (currentBratkov * (currentBratkov + 1)) / 2;
+    }
+
+    modifyTakenDamage(value, fromCard, gameContext, continuation) {
+        const bonus = Lad.getBonus();
+        const reducedDamage = Math.max(value - bonus, 0);
+
+        this.view.signalAbility(() => {
+            continuation(reducedDamage);
+        });
+    }
+
+    modifyDealedDamageToCreature(value, toCard, gameContext, continuation) {
+        const bonus = Lad.getBonus();
+        continuation(value + bonus);
+    }
+
+    getDescriptions (){
+        const description = super.getDescriptions();
+        if (Lad.prototype.hasOwnProperty('modifyDealedDamageToCreature') && Lad.prototype.hasOwnProperty('modifyTakenDamage')) {
+            return [...description, 'Чем их больше, тем они сильнее'];
+        }
+        return [...description];
+    }
+
 }
 
 class Trasher extends Dog {
@@ -104,7 +158,9 @@ class Trasher extends Dog {
     }
 }
 
+
 // Колода Шерифа, нижнего игрока.
+
 const seriffStartDeck = [
     new Duck(),
     new Duck(),
