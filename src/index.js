@@ -59,6 +59,56 @@ class Dog extends Creature{
     }
 }
 
+class Lad extends Dog{
+    constructor(name = 'Браток', power = 2) {
+        super(name, power);
+    }
+    static getInGameCount() {
+        return this.inGameCount || 0;
+    }
+    static setInGameCount(value) {
+        this.inGameCount = value;
+    }
+
+    doAfterComingIntoPlay(gameContext, continuation) {
+        const {currentPlayer, oppositePlayer, position, updateView} = gameContext;
+        Lad.setInGameCount(Lad.getInGameCount() + 1);
+        continuation();
+    }
+
+    doBeforeRemoving(continuation) {
+        Lad.setInGameCount(Lad.getInGameCount() - 1);
+        continuation();
+    };
+
+    static getBonus() {
+        const currentBratkov = this.getInGameCount();
+            return (currentBratkov * (currentBratkov + 1)) / 2;
+    }
+
+    modifyTakenDamage(value, fromCard, gameContext, continuation) {
+        const bonus = Lad.getBonus();
+        const reducedDamage = Math.max(value - bonus, 0);
+
+        this.view.signalAbility(() => {
+            continuation(reducedDamage);
+        });
+    }
+
+    modifyDealedDamageToCreature(value, toCard, gameContext, continuation) {
+        const bonus = Lad.getBonus();
+        continuation(value + bonus);
+    }
+
+    getDescriptions (){
+        const description = super.getDescriptions();
+        if (Lad.prototype.hasOwnProperty('modifyDealedDamageToCreature') && Lad.prototype.hasOwnProperty('modifyTakenDamage')) {
+            return [...description, 'Чем их больше, тем они сильнее'];
+        }
+        return [...description];
+    }
+
+}
 
 class Trasher extends Dog {
     constructor(name = 'Бандит', power = 5) {
@@ -81,10 +131,10 @@ const seriffStartDeck = [
     new Duck(),
     new Duck(),
     new Duck(),
-    new Duck(),
 ];
 const banditStartDeck = [
-    new Trasher(),
+    new Lad(),
+    new Lad(),
 ];
 // Создание игры.
 const game = new Game(seriffStartDeck, banditStartDeck);
